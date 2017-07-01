@@ -1,74 +1,90 @@
 package algo;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.Collections;
 
 public class Test1931 {
+	private static ArrayList<Reserve> times;
 	
-	static ArrayList<int[]> times;
-	static int[] reserv = new int[9999999];
-	
-	public static void main(String args[]){
+	//start 시간과 end시간을 저장하기 위함 + 정렬을 위해  
+	static class Reserve implements Comparable<Reserve>{
+		int startTime;
+		int endTime;
 		
-		Scanner scan = new Scanner(System.in);
-		int n = scan.nextInt();
-		
-		times = new ArrayList<int[]>(n);
-		
-		for(int i = 0; i < n; i++){
-			
-			int s = scan.nextInt();
-			int e = scan.nextInt();
-		
-			int[] time = new int[]{s, e};
-			times.add(time);
+		public Reserve(int startTime, int endTime){
+			this.startTime = startTime;
+			this.endTime = endTime;
 		}
 		
-		int max = 0;
+		//끝나는 시간으로 정렬 되도록 compareTo 재정의 
+		@Override
+		public int compareTo(Reserve nexRev) {
+			if(endTime < nexRev.endTime){
+				return -1;
+			}else if(endTime == nexRev.endTime){
+				return 0;
+			}
+			return 1;
+		}
+	}
+
+	public static void main(String args[]){
 		
-		for(int i = 0; i < times.size(); i ++){
-			// 일단 순서대로 하나를 넣고본다.
-			Arrays.fill(reserv, times.get(i)[0], times.get(i)[1]+1, 1);
+		BufferedReader br = null;
+		
+		try{
+			br = new BufferedReader(new InputStreamReader(System.in));
+			String[] nm = br.readLine().split(" ");
+			int n = Integer.parseInt(nm[0]);
+			//int m = Integer.parseInt(nm[1]);
 			
-			int count = 1;
-			for(int j = 0; j < times.size(); j ++){
-				// 이미 넣었으므로...
-				if(j == i){
-					continue;
-				}
+			times = new ArrayList<Reserve>(n);
+			
+			for(int i = 0; i < n; i++){
+				String[] timeStr = br.readLine().split(" ");
+				int startTime = Integer.parseInt(timeStr[0]);
+				int endTime = Integer.parseInt(timeStr[1]);
 				
-				int[] time = times.get(j);
-				int stime = time[0];
-				int etime = time[1];
-				
-				boolean ret = true;
-				for(int k = stime; k <= etime; k++){
-					if(k != stime && k != etime && reserv[k] == 1){
-						ret = false;
-						break;
+				Reserve rev = new Test1931.Reserve(startTime, endTime);
+				times.add(rev);
+			}
+			
+			// 끝나는 시각으로 정렬 
+			Collections.sort(times);
+			
+			int lastEndTime = 0;
+			int count = 0;
+			int maxCount = 0;
+			for(int i = 0; i < times.size(); i++){
+				count = 0;
+				for(int j = i; j <times.size(); j++){
+					Reserve rev = times.get(j);
+					if(lastEndTime <= rev.startTime){
+						lastEndTime = rev.endTime; 
+						count++;
 					}
 				}
 				
-				if(ret == true){
-					Arrays.fill(reserv, stime, etime+1, 1);
-					
-					//System.out.println("stime : " + stime);
-					//System.out.println("etime : " + etime);
-					count++;
+				if(count > maxCount){
+					maxCount = count;
 				}
 			}
 			
-			if(count > max)
-				max = count;
+			System.out.println(maxCount);
 			
-			Arrays.fill(reserv, 0);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			if(br != null){
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		
-		System.out.println(max);
-	}
-	
-	public static boolean go(){
-		return true;
 	}
 }
